@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {Game} from '../dist/engine.mjs';
+const step=(g,n=30,input=[{},{}])=>{for(let i=0;i<n;i++)g.update(1/60,input);};
+const ready=(opts={})=>{const g=new Game({mode:'versus',...opts});step(g,125);return g;};
+test('an attack hits once in range and misses outside range',()=>{const g=ready();g.fighters[0].x=400;g.fighters[1].x=490;assert.equal(g.action(0,'jab'),true);step(g);assert.equal(g.fighters[1].hp,93);g.fighters[1].x=700;g.action(0,'kick');step(g,40);assert.equal(g.fighters[1].hp,93);});
+test('guard reduces damage and prevents launcher',()=>{const g=ready();g.fighters[0].x=400;g.fighters[1].x=490;g.action(0,'upper');step(g,40,[{},{block:true}]);assert.equal(g.fighters[1].hp,98);assert.equal(g.fighters[1].y,0);});
+test('heat requires a full gauge and consumes it',()=>{const g=ready();assert.equal(g.action(0,'heat'),false);g.fighters[0].heat=100;assert.equal(g.action(0,'heat'),true);assert.equal(g.fighters[0].heat,0);});
+test('jump returns to the floor and fighters cannot overlap',()=>{const g=ready();g.action(0,'jump');step(g,15);assert.ok(g.fighters[0].y>0);step(g,90);assert.equal(g.fighters[0].y,0);step(g,120,[{right:true},{left:true}]);assert.ok(Math.abs(g.fighters[1].x-g.fighters[0].x)>=94.99);});
+test('pause freezes the timer, movement and phase',()=>{const g=ready();const t=g.time,x=g.fighters[0].x;g.paused=true;step(g,120,[{right:true},{}]);assert.equal(g.time,t);assert.equal(g.fighters[0].x,x);});
+test('two won rounds end the match, one won round resets health',()=>{const events=[],g=ready({onEvent:e=>events.push(e)});g.fighters[1].hp=0;step(g,1);assert.equal(g.wins[0],1);step(g,150);assert.equal(g.round,2);assert.equal(g.fighters[1].hp,100);step(g,125);g.fighters[1].hp=0;step(g,151);assert.equal(g.phase,'done');assert.equal(events.at(-1).type,'matchEnd');});
+test('training recovers the opponent and does not end',()=>{const g=ready({mode:'training'});g.fighters[1].hp=0;step(g,1);assert.equal(g.fighters[1].hp,100);assert.equal(g.phase,'fight');assert.equal(g.time,60);});
+test('AI approaches and deals damage over time',()=>{const hits=[];const g=ready({mode:'arcade',random:()=>.5,onEvent:e=>{if(e.type==='hit')hits.push(e)}});step(g,600);assert.ok(hits.some(e=>e.i===1));assert.ok(hits.length>0);});
+test('successive hits register a combo',()=>{const g=ready();g.fighters[0].x=400;g.fighters[1].x=480;g.action(0,'jab');step(g,22);g.action(0,'jab');step(g,22);assert.equal(g.fighters[0].combo,2);});

@@ -19,7 +19,7 @@ async function until(condition){for(let n=0;n<100;n++){if(condition())return;awa
 test('host and guest handshake, exchange messages and disconnect cleanly',async()=>{
  const messages=[],statuses=[];
  const host=new PeerRoom({PeerClass:FakePeer,onMessage:m=>messages.push(m),onStatus:s=>statuses.push(s)}),guest=new PeerRoom({PeerClass:FakePeer});
- try{const code=await host.host(2);await guest.join(code,3);await until(()=>host.connected&&guest.connected);assert.equal(host.remoteFighter,3);assert.equal(guest.remoteFighter,2);guest.send('action',{action:'jab'});await until(()=>messages.length>0);assert.equal(messages[0].action,'jab');guest.close();await until(()=>!host.connected);assert.ok(statuses.includes('disconnected'));}finally{host.close();guest.close();}
+ try{const code=await host.host(8);await guest.join(code,7);await until(()=>host.connected&&guest.connected);assert.equal(host.remoteFighter,7);assert.equal(guest.remoteFighter,8);guest.send('action',{action:'jab'});await until(()=>messages.length>0);assert.equal(messages[0].action,'jab');guest.close();await until(()=>!host.connected);assert.ok(statuses.includes('disconnected'));}finally{host.close();guest.close();}
 });
 test('a room rejects a third player while preserving the first connection',async()=>{
  const host=new PeerRoom({PeerClass:FakePeer}),first=new PeerRoom({PeerClass:FakePeer}),errors=[],third=new PeerRoom({PeerClass:FakePeer,onStatus:(s,m)=>{if(s==='error')errors.push(m);}});

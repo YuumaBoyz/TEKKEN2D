@@ -1,0 +1,27 @@
+<!doctype html><html lang="fr"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>VFX — Pixel Dojo</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#101017;color:#eae6dd;font:14px system-ui,sans-serif}main{max-width:1200px;margin:auto;padding:30px}header{display:flex;justify-content:space-between;gap:20px;align-items:center}h1{font-size:32px;margin:4px 0 12px;letter-spacing:-1px}p{color:#9d99a8;margin:4px 0 12px}.label{font:11px monospace;letter-spacing:3px;color:#f4b95f}a{color:#f4b95f}button,select{background:#24222e;color:inherit;border:1px solid #4c4658;padding:10px 14px;cursor:pointer;font:inherit}nav{display:flex;gap:10px;flex-wrap:wrap;margin:18px 0}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}article{border:1px solid #363141;background:#191820;padding:14px}h2{font-size:14px;margin:0 0 4px}.sub{color:#918b9e;font:11px monospace;margin:0}.stage{background-color:#191923;background-image:linear-gradient(45deg,#22222d 25%,transparent 25%),linear-gradient(-45deg,#22222d 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#22222d 75%),linear-gradient(-45deg,transparent 75%,#22222d 75%);background-size:16px 16px;background-position:0 0,0 8px,8px -8px,-8px 0}body.light .stage{background-color:#e7e3da;background-image:none}canvas{image-rendering:pixelated;display:block;width:100%;height:auto}.strip{border-top:1px solid #383143;display:flex;gap:2px}.strip canvas{width:25%}footer{margin-top:20px;color:#9791a1;font:12px monospace}.pass{color:#a9d3ba}@media(max-width:800px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}main{padding:16px}header{align-items:start}h1{font-size:25px}}
+</style><main><header><div><span class="label">TEKKEN 2D / VFX</span><h1>L’IMPACT, IMAGE PAR IMAGE.</h1><p>12 effets · 48 sprites · transparence réelle</p></div><a href="/">← Retour au jeu</a></header>
+<nav><button id="pause">Figer l’animation</button><button id="next">Image suivante</button><button id="mirror" aria-pressed="false">Inverser le sens</button><select id="background" aria-label="Fond de contrôle"><option value="dark">Damier sombre</option><option value="light">Fond clair</option></select></nav><p id="status" role="status">Chargement des planches…</p><section class="grid" id="grid"></section><footer>Les quatre vignettes montrent le démarrage, l’impact, l’expansion et la dissipation. Pixels sans lissage.</footer></main>
+<script type="module">
+import {SpriteVFX} from './vfx.mjs';import {VFX_TYPES} from './vfx-data.mjs';
+const labels={hit:'Impact léger',heavy:'Impact puissant',guard:'Garde',dust:'Atterrissage',redElectric:'Électricité · Jin',purpleElectric:'Électricité · Mishima',purification:'Purification · Jun',rage:'Rage / Heat Smash',kick:'Traînée de pied',upper:'Traînée de launcher',dash:'Dash',armor:'Armure / déchoppe'};
+const vfx=new SpriteVFX(),cards=[];let frozen=false,frame=1,face=1,last=0,elapsed=0;
+for(const [type,data] of Object.entries(VFX_TYPES)){
+ const article=document.createElement('article');article.innerHTML=`<h2>${labels[type]}</h2><p class="sub">4 FRAMES / ${Math.round(data.frameTime*4000)} MS</p><div class="stage"><canvas width="224" height="140" role="img" aria-label="${labels[type]} animé"></canvas><div class="strip">${[0,1,2,3].map(i=>`<canvas width="64" height="64" role="img" aria-label="${labels[type]} image ${i+1}"></canvas>`).join('')}</div></div>`;
+ document.querySelector('#grid').append(article);cards.push({type,data,canvases:[...article.querySelectorAll('canvas')]});
+}
+function draw(canvas,type,data,index,large){
+ const ctx=canvas.getContext('2d');ctx.clearRect(0,0,canvas.width,canvas.height);vfx.clear();
+ const size=large?140:64,scale=size/data.size,x=canvas.width/2,y=data.ground?(large?122:58):canvas.height/2;
+ vfx.spawn(type,x,y,{face,scale});vfx.effects[0].age=index*data.frameTime+.00001;vfx.draw(ctx);
+}
+function loop(now){if(!frozen)elapsed+=Math.min(.05,(now-last)/1000||0);last=now;
+ const state=vfx.getState();document.querySelector('#status').textContent=state.failed.length?'Échec de chargement : '+state.failed.join(', '):state.loaded===3?'✓ 3 planches chargées · 48 images prêtes':'Chargement des planches…';document.querySelector('#status').classList.toggle('pass',state.loaded===3);
+ for(const {type,data,canvases} of cards){draw(canvases[0],type,data,frozen?frame:Math.floor(elapsed/(data.frameTime*2))%4,true);canvases.slice(1).forEach((c,i)=>draw(c,type,data,i,false));}requestAnimationFrame(loop);
+}
+document.querySelector('#pause').onclick=e=>{frozen=!frozen;e.target.textContent=frozen?'Lire l’animation':'Figer l’animation';};
+document.querySelector('#next').onclick=()=>{frozen=true;frame=(frame+1)%4;document.querySelector('#pause').textContent='Lire l’animation';};
+document.querySelector('#mirror').onclick=e=>{face*=-1;e.target.setAttribute('aria-pressed',String(face===-1));};
+document.querySelector('#background').onchange=e=>document.body.classList.toggle('light',e.target.value==='light');requestAnimationFrame(loop);
+</script></html>

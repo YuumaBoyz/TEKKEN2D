@@ -1,7 +1,7 @@
 export const VFX_ATLASES={
- contact:{file:'assets/vfx/contact-v1.png',columns:4,rows:4},
- energy:{file:'assets/vfx/energy-v1.png',columns:4,rows:4},
- motion:{file:'assets/vfx/motion-v1.png',columns:4,rows:4}
+ contact:{file:'assets/vfx/contact-v2.png',columns:4,rows:4,bands:[[0,315],[315,635],[635,945],[945,1254]]},
+ energy:{file:'assets/vfx/energy-v2.png',columns:4,rows:4,bands:[[0,320],[320,620],[620,915],[915,1254]]},
+ motion:{file:'assets/vfx/motion-v2.png',columns:4,rows:4,bands:[[0,345],[345,710],[710,945],[945,1254]]}
 };
 // Draw sizes use the game's 960×540 coordinate space, with integer pixels.
 export const VFX_TYPES={

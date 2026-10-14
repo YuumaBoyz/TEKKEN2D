@@ -1,1 +1,12 @@
-{"name":"tekken-pixel-dojo","version":"2.0.0","private":true,"type":"module","scripts":{"dev":"node server.mjs","standalone":"node build-standalone.mjs","test":"node --test tests/*.test.mjs"}}
+{
+  "name": "tekken-pixel-dojo",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "build": "node build-standalone.mjs",
+    "standalone": "node build-standalone.mjs",
+    "test": "node --test tests/*.test.mjs"
+  }
+}

@@ -30,3 +30,12 @@ Inspection sur damier dans `dist/sprite-audit.html`, puis dans le décor du jeu 
 - Rendu sans lissage ; contours lisibles et effets d'impact construits en pixels.
 
 Les captures de contrôle sont conservées dans `qa/`. Les assets restent générés : ce contrôle décrit les défauts visibles recherchés et corrigés, et ne prétend pas certifier une absence absolue de défaut artistique.
+
+
+## Extension du roster — cinq nouveaux combattants
+
+Noé Volt, Sekhem, MIRA-0, Veer Singh et Luca Mirage disposent chacun d’une planche ImageGen de 25 poses, soit 125 poses supplémentaires et 193 poses au total. Sources conservées dans `dist/assets/sprites/{noe,sekhem,mira,veer,luca}-v3.png` ; prompts complets dans `ASSET_PROMPTS_ROSTER.md`.
+
+L’inspection alpha détecte exactement 25 silhouettes principales sur chacune des cinq planches. Les rectangles suivent les contours réels plutôt qu’une grille uniforme. Les fragments de cartes de Luca sont associés explicitement à leur pose. Les ancrages au sol et la mise à l’échelle de la page de contrôle préservent les pieds et les extensions de membres.
+
+Les captures sur damier sont dans `qa/*-roster-review.png`. Contrôle du duel Noé / Veer dans le navigateur : sprites complets, ressources STATIQUE / SABLE lisibles et charge effective après backdash. Le lecteur interactif partage `animationPose` et `moveFor` avec le jeu pour couvrir les anticipations, impacts et récupérations, ainsi que les poses dédiées de saut, dash, projection, Heat, Rage et réception.

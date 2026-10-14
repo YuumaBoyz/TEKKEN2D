@@ -20,7 +20,25 @@ export function prepareFrames(image,data){
   }
   const keep=new Uint8Array(n);
   for(const p of best){const x=p%w,y=Math.floor(p/w);for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const nx=x+dx,ny=y+dy;if(nx>=0&&ny>=0&&nx<w&&ny<h)keep[ny*w+nx]=1;}}
+  // Explicit atlas-owned fragments preserve Luca's thrown cards. Neighboring
+  // character silhouettes are still excluded by the main component mask.
+  for(const part of f.parts||[])for(let y=Math.max(0,part.y-f.y-1);y<Math.min(h,part.y-f.y+part.h+1);y++)for(let x=Math.max(0,part.x-f.x-1);x<Math.min(w,part.x-f.x+part.w+1);x++)keep[y*w+x]=1;
   for(let p=0;p<n;p++)if(!keep[p])rgba[p*4+3]=0;
   context.putImageData(pixels,0,0);return canvas;
  });
+}
+
+// Named animation states also drive the interactive sprite audit.
+export const ANIMATION_NAMES=['idle','walk','jab','kick','upper','low','power','throw','heat','smash','rage','guard','crouch','hit','ko','victory','jump','dash','landing'];
+export function animationPose(f,{time=0,phase='fight',winner=-1,index=0,move=null}={}){
+ if(f.hp<=0)return 13;
+ if(['roundEnd','done'].includes(phase)&&winner===index)return 14;
+ if(f.state==='hit')return 12;
+ if(f.block)return f.crouch?10:11;
+ if(f.move&&move){if(f.id>=4&&f.move==='throw'&&f.grab)return 20;return f.moveTime<move.startup?move.windup:f.moveTime<move.startup+move.active+.03?move.pose:move.recover;}
+ if(f.state==='crouch')return 10;
+ if(f.id>=4){if(f.landTime>0)return 24;if(f.y>0)return 17;if(f.dashTime>0)return 18;}
+ if(f.y>0)return 8;
+ if(f.state==='walk')return Math.floor(f.walk)%2?2:3;
+ return Math.floor(time*3)%2;
 }

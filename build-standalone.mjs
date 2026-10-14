@@ -4,8 +4,8 @@ const engine=(await read('dist/engine.mjs')).replace(/^export /gm,'');
 let app=(await read('dist/app.js')).replace(/^import .*;\n/gm,'');
 let spriteData=(await read('dist/sprite-data.mjs')).replace(/^export /gm,'');
 const renderer=(await read('dist/sprite-renderer.mjs')).replace(/^export /gm,'');
-const net=(await read('dist/online.mjs')).replace(/^export /gm,'');
-const modes=(await read('dist/modes.mjs')).replace(/^export /gm,'');
+const net=(await read('dist/online.mjs')).replace(/^import .*;\n/gm,'').replace(/^export /gm,'');
+const modes=(await read('dist/modes.mjs')).replace(/^import .*;\n/gm,'').replace(/^export /gm,'');
 let vfxData=(await read('dist/vfx-data.mjs')).replace(/^export /gm,'');
 const vfxCode=(await read('dist/vfx.mjs')).replace(/^import .*;\n/gm,'').replace(/^export /gm,'');
 const {VFX_ATLASES}=await import('./dist/vfx-data.mjs');
@@ -14,7 +14,7 @@ for(const file of ['assets/shrine.png',...[...SPRITES,...LOW_SPRITES].map(s=>s.f
  const uri='data:image/png;base64,'+(await fs.readFile('dist/'+file)).toString('base64');
  app=app.replace(file,uri);spriteData=spriteData.replace(file,uri);vfxData=vfxData.replace(file,uri);
 }
-const js='const {Game,FIGHTERS,MOVES,SPECIALS}=(()=>{\n'+engine+'\nreturn {Game,FIGHTERS,MOVES,SPECIALS};})();\n'+spriteData+'\n'+renderer+'\n'+net+'\n'+vfxData+'\n'+vfxCode+'\n'+app;
+const js='const {Game,FIGHTERS,MOVES,SPECIALS,moveFor}=(()=>{\n'+engine+'\nreturn {Game,FIGHTERS,MOVES,SPECIALS,moveFor};})();\n'+spriteData+'\n'+renderer+'\n'+net+'\n'+modes+'\n'+vfxData+'\n'+vfxCode+'\n'+app;
 let html=await read('dist/index.html');
 html=html.replace('<link rel="stylesheet" href="style.css">','<style>'+await read('dist/style.css')+'</style>');
 html=html.replace('<script type="module" src="app.js"></script>','<script>'+js.replace(/<\/script/gi,'<\\/script')+'</script>');

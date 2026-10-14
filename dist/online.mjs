@@ -1,4 +1,5 @@
-export const NET_VERSION=2;
+import {FIGHTERS} from './engine.mjs';
+export const NET_VERSION=3;
 const ROOM_ALPHABET='ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 export function normalizeRoomCode(value){
  const code=String(value).toUpperCase().replace(/[^A-Z0-9]/g,'');
@@ -32,7 +33,7 @@ export class PeerRoom{
   this.close();this.isHost=true;this.fighter=fighter;
   const bytes=crypto.getRandomValues(new Uint8Array(8));this.code=[...bytes].map(x=>ROOM_ALPHABET[x%ROOM_ALPHABET.length]).join('');
   this.onStatus('connecting','Création du salon…');
-  const peer=await this.makePeer('pixel-dojo-v2-'+this.code);
+  const peer=await this.makePeer('pixel-dojo-v3-'+this.code);
   peer.on('connection',conn=>{
    if(this.conn||conn.metadata?.v!==NET_VERSION){conn.on('open',()=>{conn.send({v:NET_VERSION,type:'busy',sequence:0});setTimeout(()=>conn.close(),200);});return;}
    this.bind(conn);
@@ -43,7 +44,7 @@ export class PeerRoom{
   const code=normalizeRoomCode(value);if(!code)throw new Error('Saisissez les 8 caractères du code de salon.');
   this.close();this.isHost=false;this.code=code;this.fighter=fighter;this.onStatus('connecting',"Connexion à l'hôte…");
   const peer=await this.makePeer(undefined);
-  this.bind(peer.connect('pixel-dojo-v2-'+code,{reliable:true,serialization:'json',metadata:{v:NET_VERSION}}));
+  this.bind(peer.connect('pixel-dojo-v3-'+code,{reliable:true,serialization:'json',metadata:{v:NET_VERSION}}));
  }
  bind(conn){
   this.conn=conn;
@@ -55,7 +56,7 @@ export class PeerRoom{
    this.receivedSequence=data.sequence;
    if(data.type==='busy'){clearTimeout(timeout);this.onStatus('error','Le salon accueille déjà deux joueurs.');this.close();return;}
    if(data.type==='hello'){
-    if(!Number.isInteger(data.fighter)||data.fighter<0||data.fighter>3){this.close();return;}
+    if(!Number.isInteger(data.fighter)||data.fighter<0||data.fighter>=FIGHTERS.length){this.close();return;}
     this.remoteFighter=data.fighter;this.connected=true;clearTimeout(timeout);this.onStatus('connected','Deux combattants connectés.');
     clearInterval(this.pingTimer);this.pingTimer=setInterval(()=>this.send('ping',{stamp:Date.now()}),1000);return;
    }

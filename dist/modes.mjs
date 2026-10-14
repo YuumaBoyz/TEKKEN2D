@@ -1,3 +1,4 @@
+import {FIGHTERS} from './engine.mjs';
 export const MODE_CATALOG=[
  {id:'arcade',group:'combat',number:'01',title:'Arcade Classic',tag:'8 COMBATS',description:'Huit duels, des dialogues entre rivaux et un boss final renforcé. Le parcours rétro par excellence.',action:'LANCER LE PARCOURS',available:true},
  {id:'versus',group:'combat',number:'02',title:'Versus / Local',tag:'1V1 STANDARD',description:'Deux joueurs, un clavier. Choisissez vos combattants et réglez vos comptes dans l’arène.',action:'LANCER LE DUEL',available:true},
@@ -10,7 +11,7 @@ export const MODE_CATALOG=[
 ];
 
 export function arcadeOpponent(selected,match){
- const rivals=[0,1,2,3].filter(id=>id!==selected),boss=selected===1?3:1;
+ const boss=selected===1?3:1,rivals=FIGHTERS.map(f=>f.id).filter(id=>id!==selected&&id!==boss);
  return match===8?boss:rivals[(match-1)%rivals.length];
 }
 export function arcadeDialogue(hero,rival,match){

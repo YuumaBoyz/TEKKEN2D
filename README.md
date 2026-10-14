@@ -99,4 +99,24 @@ Le site à publier est dans `dist/`. Les neuf planches et les quatre balayages s
 
 ## État de publication de la v2.1
 
+### Déploiement Netlify depuis GitHub
+
+Importer le dépôt `YuumaBoyz/TEKKEN2D` dans Netlify, sélectionner la branche `main` et laisser le dossier de base vide. La configuration versionnée dans `netlify.toml` définit Node 22, la commande `npm test && npm run build` et le dossier publié `dist`. Aucune clé API ni variable secrète n’est nécessaire pour le jeu.
+
+Le build régénère le jeu autonome et vérifie la présence des images, bibliothèques et modules JavaScript publiés. Les 46 tests doivent réussir avant publication. `package-lock.json` permet aussi une installation reproductible avec `npm ci`.
+
+Les fichiers sont revalidés dans le navigateur à chaque nouvelle visite afin de récupérer les mises à jour. Le site utilise des fichiers statiques : les ressources manquantes renvoient une vraie 404, sans fallback HTML qui casserait le chargement des modules. Les pages `/sprite-audit.html`, `/vfx-audit.html` et `/TEKKEN-2D.html` restent disponibles, ainsi que les invitations `/?room=CODE`.
+
+Pour vérifier localement les mêmes étapes :
+
+```sh
+npm ci
+npm test
+npm run build
+```
+
+Une fois le dépôt connecté au projet Netlify, les pushes sur `main` déclenchent son pipeline de déploiement selon les paramètres du projet. Voir la [configuration des builds Netlify](https://docs.netlify.com/build/configure-builds/file-based-configuration/).
+
+### Ancienne publication Sites
+
 La v2.1 est prête localement. La dernière tentative de publication a reçu `Sites project not found` pour le projet existant `appgprj_6ace7fdeeae0819190027ee53b2efe9d`. Il faut reconnecter Sites au compte ou à l’espace propriétaire avant de synchroniser et déployer. Ne pas créer un second site ni remplacer cet identifiant pour contourner ce blocage.

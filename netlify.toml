@@ -1,9 +1,9 @@
 [build]
   publish = "dist"
-  command = "npm run build"
+  command = "npm test && npm run build"
 
 [build.environment]
-  NODE_VERSION = "20"
+  NODE_VERSION = "22"
 
 # Headers de sécurité et optimisations
 [[headers]]
@@ -13,6 +13,7 @@
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Cache-Control = "public, max-age=0, must-revalidate"
 
 # Assurer le bon type MIME pour les modules JavaScript
 [[headers]]
@@ -25,19 +26,16 @@
   [headers.values]
     Content-Type = "text/javascript; charset=utf-8"
 
-# Cache long pour les assets statiques
+# Les noms de fichiers restent stables : revalider après chaque déploiement.
 [[headers]]
   for = "/assets/*"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=0, must-revalidate"
 
 [[headers]]
   for = "/vendor/*"
   [headers.values]
-    Cache-Control = "public, max-age=31536000, immutable"
+    Cache-Control = "public, max-age=0, must-revalidate"
 
-# Redirection SPA (fallback vers index.html pour les routes non-fichiers)
-[[redirects]]
-  from = "/*"
-  to = "/index.html"
-  status = 200
+# Le jeu est statique, sans routes SPA. Les fichiers absents doivent renvoyer
+# une vraie 404, jamais du HTML à la place d'un module JavaScript ou d'un PNG.
